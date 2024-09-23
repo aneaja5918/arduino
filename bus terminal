@@ -1,0 +1,54 @@
+const int SensorProximity = 12;  // Pin untuk sensor
+unsigned long previousMillis = 0;
+unsigned long interval = 1000; 
+int count = 60;  // Hitungan mulai dari 60 detik
+bool counting = false;  // Menandakan apakah hitungan sedang berlangsung
+int detectionCount = 0;  // Menghitung berapa kali sensor mendeteksi benda
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(SensorProximity, INPUT);
+}
+
+void loop() {
+  int hasil = digitalRead(SensorProximity);
+
+  // Jika objek terdeteksi dan belum mulai menghitung
+  if (hasil == LOW && !counting) {
+    detectionCount++;  // Tambah deteksi
+    Serial.print("Deteksi ke-");
+    Serial.println(detectionCount);
+
+    if (detectionCount == 1) {
+      Serial.println("Bis 1 menuju terminal");
+    } else if (detectionCount == 2) {
+      Serial.println("Bis 2 menuju terminal");
+    } else if (detectionCount == 3) {
+      Serial.println("Bis 3 menuju terminal");
+      detectionCount=0;
+    }
+    // Tambahkan lebih banyak bis jika diperlukan
+
+    counting = true;  // Mulai hitungan mundur
+    previousMillis = millis();  // Set waktu awal
+  }
+
+  // Hitungan mundur berjalan jika counting aktif
+  if (counting) {
+    unsigned long currentMillis = millis();
+    if (currentMillis - previousMillis >= interval) {
+      previousMillis = currentMillis;
+      count--;  // Mengurangi hitungan setiap detik
+      Serial.println(count);
+
+      // Jika hitungan mencapai 0, reset hitungan tetapi tidak reset sensor
+      if (count <= 0) {
+        counting = false;  // Hentikan hitungan
+        count = 60;  // Reset hitungan ke 60
+        Serial.println("Hitungan selesai! Reset ke 60.");
+      }
+    }
+  }
+
+  delay(250);  // Delay untuk menghindari pembacaan yang terlalu cepat
+}
